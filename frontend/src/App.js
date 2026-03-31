@@ -61,7 +61,7 @@ function App() {
   return (
     <div style={styles.container}>
       <h1 style={styles.heading}>💰 Expense Tracker</h1>
-      <h3 style={{ textAlign: "center" }}>By Vedika Toke</h3>
+  
 
       {/* Input Card */}
       <div style={styles.card}>
