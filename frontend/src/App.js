@@ -6,42 +6,63 @@ function App() {
   const [title, setTitle] = useState("");
   const [amount, setAmount] = useState("");
 
-  // Fetch expenses
+  const API_URL = "https://expense-tracker-rifi.onrender.com/expenses";
+
+  // ✅ Fetch expenses
   const fetchExpenses = async () => {
-    const res = await axios.get("https://expense-tracker-rifi.onrender.com/expenses");
-    setExpenses(res.data);
+    try {
+      const res = await axios.get(API_URL);
+      setExpenses(res.data);
+    } catch (error) {
+      console.error("Error fetching expenses:", error);
+    }
   };
 
   useEffect(() => {
     fetchExpenses();
   }, []);
 
-  // Add expense
+  // ✅ Add expense (FIXED)
   const addExpense = async () => {
-    if (!title || !amount) {
-      alert("Enter all fields");
-      return;
+    try {
+      console.log("Button clicked");
+
+      if (!title || !amount) {
+        alert("Enter all fields");
+        return;
+      }
+
+      await axios.post(
+        API_URL,
+        {
+          title,
+          amount: parseFloat(amount),
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      setTitle("");
+      setAmount("");
+      fetchExpenses();
+    } catch (error) {
+      console.error("Error adding expense:", error);
+      alert("Error adding expense. Check console.");
     }
-
-    await axios.post("https://expense-tracker-rifi.onrender.com/expenses", {
-      title,
-      amount: parseFloat(amount),
-    });
-
-    setTitle("");
-    setAmount("");
-    fetchExpenses();
   };
 
-  // Total calculation
+  // ✅ Total calculation
   const total = expenses.reduce((sum, e) => sum + e.amount, 0);
 
   return (
     <div style={styles.container}>
       <h1 style={styles.heading}>💰 Expense Tracker</h1>
-       <h1 style={styles.heading}> By Vedika Toke</h1>
+      <h3 style={{ textAlign: "center" }}>By Vedika Toke</h3>
 
-      {/* Input Box */}
+      {/* Input Card */}
       <div style={styles.card}>
         <input
           style={styles.input}
@@ -58,7 +79,14 @@ function App() {
           onChange={(e) => setAmount(e.target.value)}
         />
 
-        <button style={styles.button} onClick={addExpense}>
+        {/* ✅ Button FIXED */}
+        <button
+          style={styles.button}
+          onClick={(e) => {
+            e.preventDefault();
+            addExpense();
+          }}
+        >
           Add Expense
         </button>
       </div>
