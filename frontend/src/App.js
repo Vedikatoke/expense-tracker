@@ -6,7 +6,11 @@ function App() {
   const [title, setTitle] = useState("");
   const [amount, setAmount] = useState("");
 
-  const API_URL = "https://expense-tracker-rifi.onrender.com/expenses";
+  // ✅ If using single deploy (same backend)
+  const API_URL = "/expenses";
+
+  // ❗ If using separate backend (Render), use this instead:
+  // const API_URL = "https://expense-tracker-rifi.onrender.com/expenses";
 
   // ✅ Fetch expenses
   const fetchExpenses = async () => {
@@ -22,7 +26,7 @@ function App() {
     fetchExpenses();
   }, []);
 
-  // ✅ Add expense (FIXED)
+  // ✅ Add expense
   const addExpense = async () => {
     try {
       console.log("Button clicked");
@@ -32,19 +36,10 @@ function App() {
         return;
       }
 
-      
-
-      await axios.post(
-  API_URL,
-  {
-    title,
-    amount: parseFloat(amount),
-  },
-  {
-    timeout: 10000, 
-  }
-);
-
+      await axios.post(API_URL, {
+        title,
+        amount: parseFloat(amount),
+      });
 
       setTitle("");
       setAmount("");
@@ -61,9 +56,9 @@ function App() {
   return (
     <div style={styles.container}>
       <h1 style={styles.heading}>💰 Expense Tracker</h1>
-  
+      <h3 style={{ textAlign: "center" }}>By Vedika Toke</h3>
 
-      {/* Input Card */}
+      {/* Input Section */}
       <div style={styles.card}>
         <input
           style={styles.input}
@@ -80,7 +75,6 @@ function App() {
           onChange={(e) => setAmount(e.target.value)}
         />
 
-        {/* ✅ Button FIXED */}
         <button
           style={styles.button}
           onClick={(e) => {
@@ -97,14 +91,18 @@ function App() {
 
       {/* Expense List */}
       <div style={styles.list}>
-        {expenses.map((e) => (
-          <div key={e.id} style={styles.item}>
-            <span>
-              <b>{e.title}</b> ({e.category})
-            </span>
-            <span>₹{e.amount}</span>
-          </div>
-        ))}
+        {expenses.length === 0 ? (
+          <p style={{ textAlign: "center" }}>No expenses yet</p>
+        ) : (
+          expenses.map((e) => (
+            <div key={e.id} style={styles.item}>
+              <span>
+                <b>{e.title}</b> ({e.category})
+              </span>
+              <span>₹{e.amount}</span>
+            </div>
+          ))
+        )}
       </div>
     </div>
   );
