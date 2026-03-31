@@ -5,7 +5,6 @@ from flask_cors import CORS
 import os
 
 app = Flask(__name__, static_folder="build", static_url_path="")
-
 CORS(app)
 
 # DB config
@@ -14,7 +13,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
-# Model
+# MODEL
 class Expense(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100))
@@ -24,7 +23,26 @@ class Expense(db.Model):
 with app.app_context():
     db.create_all()
 
-# ✅ API ROUTES FIRST
+# 🔥 👉 ADD FUNCTION HERE
+def categorize_expense(title):
+    title = title.lower()
+
+    if any(word in title for word in ["pizza", "burger", "food", "restaurant", "cafe"]):
+        return "Food"
+    elif any(word in title for word in ["uber", "bus", "train", "flight", "travel"]):
+        return "Travel"
+    elif any(word in title for word in ["shirt", "shopping", "clothes", "mall"]):
+        return "Shopping"
+    elif any(word in title for word in ["movie", "netflix", "game"]):
+        return "Entertainment"
+    elif any(word in title for word in ["rent", "electricity", "bill"]):
+        return "Bills"
+    else:
+        return "Other"
+
+
+# API ROUTES
+
 @app.route('/expenses', methods=['GET'])
 def get_expenses():
     expenses = Expense.query.all()
@@ -32,6 +50,7 @@ def get_expenses():
         {"id": e.id, "title": e.title, "amount": e.amount, "category": e.category}
         for e in expenses
     ])
+
 
 @app.route('/expenses', methods=['POST'])
 def add_expense():
@@ -43,10 +62,13 @@ def add_expense():
     if float(data['amount']) <= 0:
         return {"error": "Amount must be > 0"}, 400
 
+    # ✅ USE FUNCTION HERE
+    category = categorize_expense(data['title'])
+
     expense = Expense(
         title=data['title'],
         amount=float(data['amount']),
-        category="General"
+        category=category
     )
 
     db.session.add(expense)
@@ -55,8 +77,7 @@ def add_expense():
     return {"message": "Added"}, 201
 
 
-# ✅ 🔥 ADD THIS AT THE END (VERY IMPORTANT)
-
+# SERVE FRONTEND (at end)
 @app.route('/')
 def serve_root():
     return send_from_directory('build', 'index.html')
@@ -70,6 +91,5 @@ def serve_static(path):
         return send_from_directory('build', 'index.html')
 
 
-# run app
 if __name__ == '__main__':
     app.run(debug=True)
