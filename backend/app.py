@@ -1,3 +1,4 @@
+# imports
 from flask import Flask, request, jsonify, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
@@ -5,66 +6,47 @@ import os
 
 app = Flask(__name__, static_folder="build", static_url_path="")
 
-# ✅ Enable CORS (safe)
-CORS(app, resources={r"/*": {"origins": "*"}})
+CORS(app)
 
-# ✅ Database config
+# DB config
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///expenses.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
-# ✅ Model
+# Model
 class Expense(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100))
     amount = db.Column(db.Float)
     category = db.Column(db.String(50), default="General")
 
-# ✅ Create DB
 with app.app_context():
     db.create_all()
 
-# ✅ API: Get all expenses
+# ✅ API ROUTES FIRST
 @app.route('/expenses', methods=['GET'])
 def get_expenses():
     expenses = Expense.query.all()
     return jsonify([
-        {
-            "id": e.id,
-            "title": e.title,
-            "amount": e.amount,
-            "category": e.category
-        } for e in expenses
+        {"id": e.id, "title": e.title, "amount": e.amount, "category": e.category}
+        for e in expenses
     ])
 
-# ✅ API: Add expense
 @app.route('/expenses', methods=['POST'])
 def add_expense():
     data = request.get_json()
 
-    # Validation
     if not data or 'title' not in data or 'amount' not in data:
         return {"error": "Invalid data"}, 400
 
     if float(data['amount']) <= 0:
         return {"error": "Amount must be > 0"}, 400
 
-    # Simple category logic
-    title = data['title'].lower()
-    if "pizza" in title or "food" in title:
-        category = "Food"
-    elif "travel" in title:
-        category = "Travel"
-    elif "shop" in title:
-        category = "Shopping"
-    else:
-        category = "General"
-
     expense = Expense(
         title=data['title'],
         amount=float(data['amount']),
-        category=category
+        category="General"
     )
 
     db.session.add(expense)
@@ -72,15 +54,22 @@ def add_expense():
 
     return {"message": "Added"}, 201
 
-# ✅ Serve React frontend (IMPORTANT)
-@app.route('/', defaults={'path': ''})
-@app.route('/<path:path>')
-def serve(path):
-    if path != "" and os.path.exists(os.path.join(app.static_folder, path)):
-        return send_from_directory(app.static_folder, path)
-    return send_from_directory(app.static_folder, "index.html")
 
-# ✅ Run app
+# ✅ 🔥 ADD THIS AT THE END (VERY IMPORTANT)
+
+@app.route('/')
+def serve_root():
+    return send_from_directory('build', 'index.html')
+
+@app.route('/<path:path>')
+def serve_static(path):
+    file_path = os.path.join('build', path)
+    if os.path.exists(file_path):
+        return send_from_directory('build', path)
+    else:
+        return send_from_directory('build', 'index.html')
+
+
+# run app
 if __name__ == '__main__':
-    print("🚀 Server starting...")
     app.run(debug=True)
