@@ -68,8 +68,8 @@ def add_expense():
         return jsonify({"error": "Amount must be greater than 0"}), 400
 
     # AI categorization
-    category = categorize_expense(data['title'])
-
+    #category = categorize_expense(data['title'])
+    category = "General"
     # Create expense
     expense = Expense(
         title=data['title'],
