@@ -8,7 +8,7 @@ function App() {
 
   // Fetch expenses
   const fetchExpenses = async () => {
-    const res = await axios.get("http://127.0.0.1:5000/expenses");
+    const res = await axios.get("https://expense-tracker-rifi.onrender.com/expenses");
     setExpenses(res.data);
   };
 
@@ -23,7 +23,7 @@ function App() {
       return;
     }
 
-    await axios.post("http://127.0.0.1:5000/expenses", {
+    await axios.post("https://expense-tracker-rifi.onrender.com/expenses", {
       title,
       amount: parseFloat(amount),
     });
