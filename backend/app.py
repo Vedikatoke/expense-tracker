@@ -7,7 +7,8 @@ from ai_service import categorize_expense
 
 # Create app
 app = Flask(__name__)
-CORS(app)
+
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 # Database config
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///expenses.db'
@@ -86,5 +87,11 @@ def add_expense():
 # Run App
 # -------------------------------
 if __name__ == '__main__':
-    print("🚀 Server starting...")
+    print(" Server starting...")
     app.run(host="0.0.0.0", port=5000)
+@app.after_request
+def after_request(response):
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,POST,OPTIONS')
+    return response

@@ -32,18 +32,19 @@ function App() {
         return;
       }
 
+      
+
       await axios.post(
-        API_URL,
-        {
-          title,
-          amount: parseFloat(amount),
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+  API_URL,
+  {
+    title,
+    amount: parseFloat(amount),
+  },
+  {
+    timeout: 10000, 
+  }
+);
+
 
       setTitle("");
       setAmount("");
